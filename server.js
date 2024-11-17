@@ -48,13 +48,18 @@ function joinGame(gameId, player) {
   game.players.push(player);
 }
 
-function selectMovie(gameId, player, movieTitle) {
-  const game = db.games[gameId];
-  if (!game) throw new Error('Game not found');
-  game.movies[player] = { title: movieTitle, score: 5 };
-  if (Object.keys(game.movies).length === game.players.length) {
-    game.status = 'playing';
-  }
+function selectMovie(gameId, player, movieTitle, movieId, poster) {
+    const game = db.games[gameId];
+    if (!game) throw new Error('Game not found');
+    game.movies[player] = { 
+        title: movieTitle,
+        score: 5,
+        movieId: movieId,
+        poster: poster 
+    };
+    if (Object.keys(game.movies).length === game.players.length) {
+        game.status = 'playing';
+    }
 }
 
 function performAction(gameId, player, action, targetMovie) {
@@ -140,14 +145,14 @@ app.post('/api/games/:gameId/join', (req, res) => {
 });
 
 app.post('/api/games/:gameId/select-movie', (req, res) => {
-  try {
-    const { gameId } = req.params;
-    const { username, movieTitle } = req.body;
-    selectMovie(gameId, username, movieTitle);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+    try {
+        const { gameId } = req.params;
+        const { username, movieTitle, movieId, poster } = req.body;
+        selectMovie(gameId, username, movieTitle, movieId, poster);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 app.post('/api/games/:gameId/action', (req, res) => {
