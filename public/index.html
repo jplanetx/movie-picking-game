@@ -6,173 +6,174 @@
     <title>Movie Battle</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #2C3E50;
-            --secondary-color: #E74C3C;
-            --accent-color: #3498DB;
-            --background-color: #ECF0F1;
-            --text-color: #2C3E50;
-            --card-background: #FFFFFF;
-        }
+    :root {
+        --primary-color: #2D3250;
+        --secondary-color: #424769;
+        --accent-color: #7077A1;
+        --background-color: #F6B17A;
+        --text-color: #2D3250;
+        --card-background: #ffffff;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, var(--background-color), #f7d6bd);
+        color: var(--text-color);
+        min-height: 100vh;
+    }
 
-        .hidden {
-            display: none;
-        }
+    .hidden {
+        display: none;
+    }
 
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 1em;
-        }
+    h1 {
+        color: var(--primary-color);
+        text-align: center;
+        font-size: 3em;
+        margin-bottom: 1em;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
 
-        #gameBoard {
-            background-color: var(--card-background);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin-top: 20px;
-        }
+    #gameBoard {
+        background-color: var(--card-background);
+        border-radius: 20px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        padding: 30px;
+        margin-top: 20px;
+        backdrop-filter: blur(10px);
+    }
 
-        .movie-item {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: var(--background-color);
-            border-radius: 10px;
-            transition: transform 0.2s ease-in-out;
-        }
+    .movie-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 20px;
+        background: linear-gradient(to right, #ffffff, #f8f9fa);
+        border-radius: 15px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease-in-out;
+    }
 
-        .movie-item:hover {
-            transform: translateX(5px);
-        }
+    .movie-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
 
-        .progress-container {
-            height: 20px;
-            background-color: #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+    .movie-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: var(--primary-color);
+    }
 
-        .progress-bar {
-            height: 100%;
-            background-color: var(--accent-color);
-            transition: width 0.5s ease-in-out;
-            border-radius: 10px;
-        }
+    .progress-container {
+        height: 24px;
+        background-color: #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 10px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
 
-        button {
-            padding: 12px 24px;
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: transform 0.1s ease-in-out, background-color 0.2s ease-in-out;
-        }
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
+        transition: width 0.5s ease-in-out;
+        border-radius: 12px;
+    }
 
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
+    button {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-        button:active {
-            transform: translateY(0);
-        }
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
 
-        input[type="text"], input[type="password"] {
-            padding: 12px;
-            margin-right: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.2s ease-in-out;
-        }
+    button:active {
+        transform: translateY(0);
+    }
 
-        input[type="text"]:focus, input[type="password"]:focus {
-            border-color: var(--accent-color);
-            outline: none;
-        }
+    input[type="text"], input[type="password"] {
+        padding: 12px;
+        margin-right: 10px;
+        border: 2px solid #ddd;
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
 
-        #error-message {
-            color: var(--secondary-color);
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-        }
+    input[type="text"]:focus, input[type="password"]:focus {
+        border-color: var(--accent-color);
+        outline: none;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
 
-        .game-controls {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    #game-id-display {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px 0;
+        text-align: center;
+        border: 2px dashed var(--accent-color);
+    }
 
-        .score {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: var(--accent-color);
-        }
+    .game-controls {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
 
-        @keyframes scoreChange {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
+    .player-info {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
 
-        #gameResult {
-            text-align: center;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--accent-color), #2980b9);
-            color: white;
-            border-radius: 10px;
-            margin-top: 20px;
-            animation: slideIn 0.5s ease-out;
-        }
+    .current-turn {
+        color: var(--accent-color);
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+        margin: 10px 0;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
 
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        #winner {
-            font-size: 1.5em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .auth-container {
-            text-align: center;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: var(--card-background);
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .player-count {
-            text-align: center;
-            color: var(--accent-color);
-            font-size: 1.1em;
-            margin: 10px 0;
-        }
-    </style>
+    .score {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: var(--primary-color);
+        text-align: right;
+    }
+    .auth-container {
+        text-align: center;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: var(--card-background);
+        border-radius: 20px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+</style>
 </head>
 <body>
     <h1 class="animate__animated animate__fadeIn">Movie Battle</h1>
@@ -196,6 +197,10 @@
         
         <div id="gameBoard" class="hidden animate__animated animate__fadeIn">
             <h3>Game ID: <span id="currentGameId"></span></h3>
+            <div id="game-id-display">
+    <p>Share this Game ID with your friend to play together:</p>
+    <strong><span id="shareGameId"></span></strong>
+</div>
             <div class="player-count"></div>
             <div id="playerList" class="animate__animated animate__fadeIn"></div>
             
@@ -410,6 +415,24 @@
                 updateGameState();
             }
         }, 2000);
+        // Update the share game ID
+ function updateGameIdDisplay(gameId) {
+            const currentGameIdSpan = document.getElementById('currentGameId');
+            const shareGameId = document.getElementById('shareGameId');
+            if (currentGameIdSpan) currentGameIdSpan.textContent = gameId;
+            if (shareGameId) shareGameId.textContent = gameId;
+        }
+
+        // Modify createNewGame to update both displays
+        const originalCreateNewGame = createNewGame;
+        createNewGame = async function() {
+            try {
+                await originalCreateNewGame();
+                updateGameIdDisplay(currentGameId);
+            } catch (error) {
+                showError(error.message);
+            }
+        };
     </script>
 </body>
 </html>
