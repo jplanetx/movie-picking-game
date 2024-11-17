@@ -3,6 +3,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
 // Database simulation
 const db = {
@@ -167,6 +169,47 @@ app.get('/api/games/:gameId', (req, res) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+});
+
+// Search movies
+app.get('/api/movies/search', async (req, res) => {
+    try {
+        const { query } = req.query;
+        const response = await fetch(
+            `${TMDB_BASE_URL}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=en-US&page=1`
+        );
+        const data = await response.json();
+        res.json(data.results.map(movie => ({
+            id: movie.id,
+            title: movie.title,
+            poster: movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : null,
+            year: movie.release_date ? movie.release_date.split('-')[0] : '',
+            overview: movie.overview
+        })));
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get movie details
+app.get('/api/movies/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const response = await fetch(
+            `${TMDB_BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=en-US`
+        );
+        const movie = await response.json();
+        res.json({
+            id: movie.id,
+            title: movie.title,
+            poster: movie.poster_path ? `https://image.tmdb.org/t/p/w400${movie.poster_path}` : null,
+            year: movie.release_date ? movie.release_date.split('-')[0] : '',
+            overview: movie.overview,
+            rating: movie.vote_average
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.listen(port, () => {
