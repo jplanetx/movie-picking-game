@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Battle</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #E74C3C;
+            --accent-color: #3498DB;
+            --background-color: #ECF0F1;
+            --text-color: #2C3E50;
+            --card-background: #FFFFFF;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 1em;
+        }
+
+        #gameBoard {
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .movie-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--background-color);
+            border-radius: 10px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .movie-item:hover {
+            transform: translateX(5px);
+        }
+
+        .progress-container {
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent-color);
+            transition: width 0.5s ease-in-out;
+            border-radius: 10px;
+        }
+
+        button {
+            padding: 12px 24px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.1s ease-in-out, background-color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        input[type="text"], input[type="password"] {
+            padding: 12px;
+            margin-right: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.2s ease-in-out;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        #error-message {
+            color: var(--secondary-color);
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        @keyframes scoreChange {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        #gameResult {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--accent-color), #2980b9);
+            color: white;
+            border-radius: 10px;
+            margin-top: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #winner {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .auth-container {
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .player-count {
+            text-align: center;
+            color: var(--accent-color);
+            font-size: 1.1em;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="animate__animated animate__fadeIn">Movie Battle</h1>
+    
+    <div id="authSection" class="animate__animated animate__fadeIn">
+        <div class="auth-container">
+            <h2>Welcome to Movie Battle!</h2>
+            <p>Enter a username to start playing</p>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="authenticate()">Start Playing</button>
+        </div>
+    </div>
+
+    <div id="gameSection" class="hidden animate__animated animate__fadeIn">
+        <div class="game-controls">
+            <button onclick="createNewGame()">Create New Game</button>
+            <input type="text" id="gameId" placeholder="Enter Game ID">
+            <button onclick="joinGame()">Join Game</button>
+        </div>
+        
+        <div id="gameBoard" class="hidden animate__animated animate__fadeIn">
+            <h3>Game ID: <span id="currentGameId"></span></h3>
+            <div class="player-count"></div>
+            <div id="playerList" class="animate__animated animate__fadeIn"></div>
+            
+            <div id="movieSelection" class="hidden animate__animated animate__fadeIn">
+                <input type="text" id="movieTitle" placeholder="Enter your favorite movie">
+                <button onclick="selectMovie()">Select Movie</button>
+            </div>
+            
+            <div id="gamePlay" class="hidden animate__animated animate__fadeIn">
+                <h4>Current Turn: <span id="currentTurn"></span></h4>
+                <div id="movieList"></div>
+                <div class="game-controls">
+                    <button onclick="performAction('forward')">Move Forward (+2)</button>
+                    <button onclick="performAction('backward')">Move Backward (-1)</button>
+                </div>
+            </div>
+            
+            <div id="gameResult" class="hidden">
+                <h3>🎬 Game Over! 🎬</h3>
+                <p>And the winner is...</p>
+                <p id="winner"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="error-message"></div>
+
+    <script>
+        let currentUser = null;
+        let currentGameId = null;
+        let gameState = null;
+
+        // Get the current URL for the API endpoint
+        const API_URL = window.location.origin + '/api';
+
+        async function authenticate() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            try {
+                const response = await fetch(`${API_URL}/auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                if (!response.ok) throw new Error('Authentication failed');
+                currentUser = await response.json();
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('gameSection').classList.remove('hidden');
+            } catch (error) {
+                showError('Authentication failed: ' + error.message);
+            }
+        }
+
+        async function createNewGame() {
+            try {
+                const response = await fetch(`${API_URL}/games`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username })
+                });
+                if (!response.ok) throw new Error('Failed to create game');
+                const data = await response.json();
+                currentGameId = data.gameId;
+                document.getElementById('currentGameId').textContent = currentGameId;
+                document.getElementById('gameBoard').classList.remove('hidden');
+                document.getElementById('movieSelection').classList.remove('hidden');
+                updateGameState();
+            } catch (error) {
+                showError('Failed to create game: ' + error.message);
+            }
+        }
+
+        async function joinGame() {
+            const gameId = document.getElementById('gameId').value;
+            try {
+                const response = await fetch(`${API_URL}/games/${gameId}/join`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username })
+                });
+                if (!response.ok) throw new Error('Failed to join game');
+                currentGameId = gameId;
+                document.getElementById('currentGameId').textContent = currentGameId;
+                document.getElementById('gameBoard').classList.remove('hidden');
+                document.getElementById('movieSelection').classList.remove('hidden');
+                updateGameState();
+            } catch (error) {
+                showError('Failed to join game: ' + error.message);
+            }
+        }
+
+        async function selectMovie() {
+            const movieTitle = document.getElementById('movieTitle').value;
+            if (!movieTitle.trim()) {
+                showError('Please enter a movie title');
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/games/${currentGameId}/select-movie`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username, movieTitle })
+                });
+                if (!response.ok) throw new Error('Failed to select movie');
+                document.getElementById('movieSelection').classList.add('hidden');
+                document.getElementById('gamePlay').classList.remove('hidden');
+                updateGameState();
+            } catch (error) {
+                showError('Failed to select movie: ' + error.message);
+            }
+        }
+
+        async function performAction(action) {
+            const targetMovie = prompt('Enter the name of the movie to target:');
+            if (!targetMovie) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/games/${currentGameId}/action`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username, action, targetMovie })
+                });
+                if (!response.ok) throw new Error('Failed to perform action');
+                updateGameState();
+            } catch (error) {
+                showError('Failed to perform action: ' + error.message);
+            }
+        }
+
+        async function updateGameState() {
+            try {
+                const response = await fetch(`${API_URL}/games/${currentGameId}`);
+                if (!response.ok) throw new Error('Failed to get game state');
+                gameState = await response.json();
+                updatePlayerList();
+                updateMovieList();
+                updateCurrentTurn();
+                checkGameEnd();
+            } catch (error) {
+                showError('Failed to update game state: ' + error.message);
+            }
+        }
+
+        function updatePlayerList() {
+            const playerList = document.getElementById('playerList');
+            const playerCount = document.querySelector('.player-count');
+            playerCount.textContent = `Players: ${gameState.players.length}`;
+            playerList.innerHTML = '<h4>Players:</h4>' + gameState.players.join(', ');
+        }
+
+        function updateMovieList() {
+            const movieList = document.getElementById('movieList');
+            movieList.innerHTML = '';
+            for (const [player, movie] of Object.entries(gameState.movies)) {
+                const movieItem = document.createElement('div');
+                movieItem.className = 'movie-item animate__animated animate__fadeIn';
+                
+                const progressContainer = document.createElement('div');
+                progressContainer.className = 'progress-container';
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressBar.style.width = `${(movie.score / 20) * 100}%`;
+                progressContainer.appendChild(progressBar);
+
+                movieItem.innerHTML = `
+                    <div>
+                        <strong>${player}</strong>
+                        <div>${movie.title}</div>
+                    </div>
+                    ${progressContainer.outerHTML}
+                    <div class="score">${movie.score}</div>
+                `;
+                movieList.appendChild(movieItem);
+            }
+        }
+
+        function updateCurrentTurn() {
+            document.getElementById('currentTurn').textContent = gameState.currentTurn;
+            // Highlight current player's turn
+            const allMovieItems = document.querySelectorAll('.movie-item');
+            allMovieItems.forEach(item => {
+                if (item.querySelector('strong').textContent === gameState.currentTurn) {
+                    item.style.borderLeft = '4px solid var(--accent-color)';
+                } else {
+                    item.style.borderLeft = 'none';
+                }
+            });
+        }
+
+        function checkGameEnd() {
+            if (gameState.status === 'finished') {
+                document.getElementById('gamePlay').classList.add('hidden');
+                const gameResult = document.getElementById('gameResult');
+                gameResult.classList.remove('hidden');
+                document.getElementById('winner').textContent = gameState.winner;
+            }
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.classList.add('animate__animated', 'animate__shakeX');
+            setTimeout(() => {
+                errorElement.textContent = '';
+                errorElement.classList.remove('animate__animated', 'animate__shakeX');
+            }, 5000);
+        }
+
+        // Auto-update game state every 2 seconds
+        setInterval(() => {
+            if (currentGameId && gameState?.status !== 'finished') {
+                updateGameState();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
