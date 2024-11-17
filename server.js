@@ -63,29 +63,69 @@ function selectMovie(gameId, player, movieTitle, movieId, poster) {
 }
 
 function performAction(gameId, player, action, targetMovie) {
-  const game = db.games[gameId];
-  if (!game || game.status !== 'playing') {
-    throw new Error('Invalid game state');
-  }
+    const game = db.games[gameId];
+    if (!game || game.status !== 'playing') {
+        throw new Error('Invalid game state');
+    }
 
-  const movieEntry = Object.entries(game.movies).find(([_, movie]) => movie.title === targetMovie);
-  if (!movieEntry) throw new Error('Movie not found');
+    // Initialize turn state if it doesn't exist
+    if (!game.turnState) {
+        game.turnState = {
+            forwardMovesLeft: 2,
+            backwardMoveLeft: 1,
+            currentPlayer: game.players[game.currentTurn]
+        };
+    }
 
-  const [_, movie] = movieEntry;
+    // Verify it's the player's turn
+    if (game.turnState.currentPlayer !== player) {
+        throw new Error('Not your turn');
+    }
 
-  if (action === 'forward') {
-    movie.score += 2;
-  } else if (action === 'backward') {
-    movie.score = Math.max(0, movie.score - 1);
-  }
+    const movieEntry = Object.entries(game.movies).find(([_, movie]) => movie.title === targetMovie);
+    if (!movieEntry) throw new Error('Movie not found');
 
-  game.currentTurn = (game.currentTurn + 1) % game.players.length;
-  game.rounds++;
+    const [_, movie] = movieEntry;
 
-  if (movie.score >= game.winningScore || game.rounds >= game.maxRounds * game.players.length) {
-    game.status = 'finished';
-    game.winner = getWinner(game);
-  }
+    if (action === 'forward') {
+        if (game.turnState.forwardMovesLeft <= 0) {
+            throw new Error('No forward moves left this turn');
+        }
+        movie.score += 1;
+        game.turnState.forwardMovesLeft--;
+    } else if (action === 'backward') {
+        if (game.turnState.backwardMoveLeft <= 0) {
+            throw new Error('No backward moves left this turn');
+        }
+        movie.score = Math.max(0, movie.score - 1);
+        game.turnState.backwardMoveLeft--;
+    }
+
+    // Check if turn is complete
+    if (game.turnState.forwardMovesLeft === 0 && game.turnState.backwardMoveLeft === 0) {
+        // Move to next player
+        game.currentTurn = (game.currentTurn + 1) % game.players.length;
+        // Reset turn state
+        game.turnState = {
+            forwardMovesLeft: 2,
+            backwardMoveLeft: 1,
+            currentPlayer: game.players[game.currentTurn]
+        };
+    }
+
+    game.rounds++;
+
+    // Check for game end
+    if (Object.values(game.movies).some(m => m.score >= game.winningScore) || 
+        game.rounds >= game.maxRounds * game.players.length) {
+        game.status = 'finished';
+        game.winner = getWinner(game);
+    }
+
+    return {
+        turnState: game.turnState,
+        gameState: getGameState(gameId)
+    };
 }
 
 function getWinner(game) {
@@ -156,14 +196,14 @@ app.post('/api/games/:gameId/select-movie', (req, res) => {
 });
 
 app.post('/api/games/:gameId/action', (req, res) => {
-  try {
-    const { gameId } = req.params;
-    const { username, action, targetMovie } = req.body;
-    performAction(gameId, username, action, targetMovie);
-    res.json({ success: true });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
+    try {
+        const { gameId } = req.params;
+        const { username, action, targetMovie } = req.body;
+        const result = performAction(gameId, username, action, targetMovie);
+        res.json(result);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
 });
 
 app.get('/api/games/:gameId', (req, res) => {
