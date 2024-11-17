@@ -340,13 +340,14 @@
 </div>
             
             <div id="gamePlay" class="hidden animate__animated animate__fadeIn">
-                <h4>Current Turn: <span id="currentTurn"></span></h4>
-                <div id="movieList"></div>
-                <div class="game-controls">
-                    <button onclick="performAction('forward')">Move Forward (+2)</button>
-                    <button onclick="performAction('backward')">Move Backward (-1)</button>
-                </div>
-            </div>
+    <h4>Current Turn: <span id="currentTurn"></span></h4>
+    <div id="movieList"></div>
+    <div id="movesInfo" class="moves-info"></div>
+    <div class="game-controls">
+        <button onclick="performAction('forward')">Move Forward (+1)</button>
+        <button onclick="performAction('backward')">Move Backward (-1)</button>
+    </div>
+</div>
             
             <div id="gameResult" class="hidden">
                 <h3>🎬 Game Over! 🎬</h3>
@@ -443,22 +444,38 @@
             }
         }
 
-        async function performAction(action) {
-            const targetMovie = prompt('Enter the name of the movie to target:');
-            if (!targetMovie) return;
-            
-            try {
-                const response = await fetch(`${API_URL}/games/${currentGameId}/action`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: currentUser.username, action, targetMovie })
-                });
-                if (!response.ok) throw new Error('Failed to perform action');
-                updateGameState();
-            } catch (error) {
-                showError('Failed to perform action: ' + error.message);
-            }
+       async function performAction(action) {
+    const targetMovie = prompt('Enter the name of the movie to target:');
+    if (!targetMovie) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/games/${currentGameId}/action`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: currentUser.username, action, targetMovie })
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error);
         }
+        const result = await response.json();
+        gameState = result.gameState;
+        updateUI(result.turnState);
+        updateGameState();
+    } catch (error) {
+        showError(error.message);
+    }
+}
+
+function updateUI(turnState) {
+    // Update remaining moves display
+    const movesInfo = document.getElementById('movesInfo');
+    if (turnState.currentPlayer === currentUser.username) {
+        movesInfo.textContent = `Your turn! Forward moves left: ${turnState.forwardMovesLeft}, Backward moves left: ${turnState.backwardMoveLeft}`;
+    } else {
+        movesInfo.textContent = `Waiting for ${turnState.currentPlayer}'s turn`;
+    }
+}
 
         async function updateGameState() {
             try {
